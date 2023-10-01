@@ -2,7 +2,7 @@ __SDXL is now supported. The sdxl branch has been merged into the main branch. I
 
 This repository contains training, generation and utility scripts for Stable Diffusion.
 
-[__Change History__](#change-history) is moved to the bottom of the page. 
+[__Change History__](#change-history) is moved to the bottom of the page.
 更新履歴は[ページ末尾](#change-history)に移しました。
 
 [日本語版READMEはこちら](./README-ja.md)
@@ -170,7 +170,7 @@ The documentation in this section will be moved to a separate document later.
 
 - `sdxl_train.py` is a script for SDXL fine-tuning. The usage is almost the same as `fine_tune.py`, but it also supports DreamBooth dataset.
   - `--full_bf16` option is added. Thanks to KohakuBlueleaf!
-    - This option enables the full bfloat16 training (includes gradients). This option is useful to reduce the GPU memory usage. 
+    - This option enables the full bfloat16 training (includes gradients). This option is useful to reduce the GPU memory usage.
     - The full bfloat16 training might be unstable. Please use it at your own risk.
   - The different learning rates for each U-Net block are now supported in sdxl_train.py. Specify with `--block_lr` option. Specify 23 values separated by commas like `--block_lr 1e-3,1e-3 ... 1e-3`.
     - 23 values correspond to `0: time/label embed, 1-9: input blocks 0-8, 10-12: mid blocks 0-2, 13-21: output blocks 0-8, 22: out`.
@@ -195,13 +195,13 @@ The documentation in this section will be moved to a separate document later.
 
 ### Utility scripts for SDXL
 
-- `tools/cache_latents.py` is added. This script can be used to cache the latents to disk in advance. 
+- `tools/cache_latents.py` is added. This script can be used to cache the latents to disk in advance.
   - The options are almost the same as `sdxl_train.py'. See the help message for the usage.
   - Please launch the script as follows:
     `accelerate launch  --num_cpu_threads_per_process 1 tools/cache_latents.py ...`
   - This script should work with multi-GPU, but it is not tested in my environment.
 
-- `tools/cache_text_encoder_outputs.py` is added. This script can be used to cache the text encoder outputs to disk in advance. 
+- `tools/cache_text_encoder_outputs.py` is added. This script can be used to cache the text encoder outputs to disk in advance.
   - The options are almost the same as `cache_latents.py` and `sdxl_train.py`. See the help message for the usage.
 
 - `sdxl_gen_img.py` is added. This script can be used to generate images with SDXL, including LoRA, Textual Inversion and ControlNet-LLLite. See the help message for the usage.
@@ -307,6 +307,34 @@ ControlNet-LLLite, a novel method for ControlNet with SDXL, is added. See [docum
 - PagedAdamW32bit オプティマイザがサポートされました。`--optimizer_type=PagedAdamW32bit` と指定してください。xzuyn 氏に感謝します。 PR [#900](https://github.com/kohya-ss/sd-scripts/pull/900)
 - その他のバグ修正と改善。
 
+=======
+### Oct 1. 2023 / 2023/10/1
+
+- SDXL training is now available in the main branch. The sdxl branch is merged into the main branch.
+
+- [SAI Model Spec](https://github.com/Stability-AI/ModelSpec) metadata is now supported partially. `hash_sha256` is not supported yet.
+  - The main items are set automatically.
+  - You can set title, author, description, license and tags with `--metadata_xxx` options in each training script.
+  - Merging scripts also support minimum SAI Model Spec metadata. See the help message for the usage.
+  - Metadata editor will be available soon.
+
+- `bitsandbytes` is now optional. Please install it if you want to use it. The insructions are in the later section.
+
+- `albumentations` is not required anymore.
+
+- `--v_pred_like_loss ratio` option is added. This option adds the loss like v-prediction loss in SDXL training. `0.1` means that the loss is added 10% of the v-prediction loss. The default value is None (disabled).
+  - In v-prediction, the loss is higher in the early timesteps (near the noise). This option can be used to increase the loss in the early timesteps.
+
+- Arbitrary options can be used for Diffusers' schedulers. For example `--lr_scheduler_args "lr_end=1e-8"`.
+
+- LoRA-FA is added experimentally. Specify `--network_module networks.lora_fa` option instead of `--network_module networks.lora`. The trained model can be used as a normal LoRA model.
+- JPEG XL is supported. [#786](https://github.com/kohya-ss/sd-scripts/pull/786)
+- Input perturbation noise is added. See [#798](https://github.com/kohya-ss/sd-scripts/pull/798) for details.
+- Dataset subset now has `caption_prefix` and `caption_suffix` options. The strings are added to the beginning and the end of the captions before shuffling. You can specify the options in `.toml`.
+- Intel ARC support with IPEX is added. [#825](https://github.com/kohya-ss/sd-scripts/pull/825)
+- Other bug fixes and improvements.
+
+>>>>>>> c918489 (update readme)
 
 Please read [Releases](https://github.com/kohya-ss/sd-scripts/releases) for recent updates.
 最近の更新情報は [Release](https://github.com/kohya-ss/sd-scripts/releases) をご覧ください。
