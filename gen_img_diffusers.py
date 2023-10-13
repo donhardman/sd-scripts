@@ -88,7 +88,7 @@ from diffusers import (
     KDPM2DiscreteScheduler,
     KDPM2AncestralDiscreteScheduler,
     # UNet2DConditionModel,
-    StableDiffusionPipeline,
+    StableDiffusionKDiffusionPipeline,
 )
 from einops import rearrange
 from tqdm import tqdm
@@ -425,7 +425,7 @@ class PipelineLike:
         self.unet = unet
         self.scheduler = scheduler
         self.safety_checker = None
-
+et_
         # Textual Inversion
         self.token_replacements = {}
 
@@ -2176,7 +2176,7 @@ def main(args):
         text_encoder, vae, unet = model_util.load_models_from_stable_diffusion_checkpoint(args.v2, args.ckpt)
     else:
         print("load Diffusers pretrained models")
-        loading_pipe = StableDiffusionPipeline.from_pretrained(args.ckpt, safety_checker=None, torch_dtype=dtype)
+        loading_pipe = StableDiffusionKDiffusionPipeline.from_pretrained(args.ckpt, safety_checker=None, torch_dtype=dtype)
         text_encoder = loading_pipe.text_encoder
         vae = loading_pipe.vae
         unet = loading_pipe.unet
@@ -2259,7 +2259,6 @@ def main(args):
         scheduler_cls = DPMSolverMultistepScheduler
         sched_init_args["algorithm_type"] = args.sampler
         sched_init_args["use_karras_sigmas"] = True
-        sched_init_args["thresholding"] = True
         scheduler_module = diffusers.schedulers.scheduling_dpmsolver_multistep
     elif args.sampler == "heun":
         scheduler_cls = HeunDiscreteScheduler
@@ -5672,7 +5671,7 @@ def main(args):
         text_encoder, vae, unet = model_util.load_models_from_stable_diffusion_checkpoint(args.v2, args.ckpt)
     else:
         print("load Diffusers pretrained models")
-        loading_pipe = StableDiffusionPipeline.from_pretrained(args.ckpt, safety_checker=None, torch_dtype=dtype)
+        loading_pipe = StableDiffusionKDiffusionPipeline.from_pretrained(args.ckpt, safety_checker=None, torch_dtype=dtype)
         text_encoder = loading_pipe.text_encoder
         vae = loading_pipe.vae
         unet = loading_pipe.unet

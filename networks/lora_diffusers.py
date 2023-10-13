@@ -473,7 +473,7 @@ if __name__ == "__main__":
     # sample code to use LoRANetwork
     import os
     import argparse
-    from diffusers import StableDiffusionPipeline, StableDiffusionXLPipeline
+    from diffusers import StableDiffusionPipeline, StableDiffusionKDiffusionPipeline
     import torch
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -491,10 +491,11 @@ if __name__ == "__main__":
 
     # load Diffusers model
     print(f"load model from {args.model_id}")
-    pipe: Union[StableDiffusionPipeline, StableDiffusionXLPipeline]
+    pipe: Union[StableDiffusionPipeline, StableDiffusionKDiffusionPipeline]
     if args.sdxl:
         # use_safetensors=True does not work with 0.18.2
-        pipe = StableDiffusionXLPipeline.from_pretrained(args.model_id, variant="fp16", torch_dtype=torch.float16)
+        pipe = StableDiffusionKDiffusionPipeline.from_pretrained(args.model_id, variant="fp16", torch_dtype=torch.float16)
+        pipeline.set_scheduler("sample_dpmpp_2m_sde")
     else:
         pipe = StableDiffusionPipeline.from_pretrained(args.model_id, variant="fp16", torch_dtype=torch.float16)
     pipe.to(device)

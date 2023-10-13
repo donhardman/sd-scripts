@@ -523,7 +523,7 @@ def save_stable_diffusion_checkpoint(
 def save_diffusers_checkpoint(
     output_dir, text_encoder1, text_encoder2, unet, pretrained_model_name_or_path, vae=None, use_safetensors=False, save_dtype=None
 ):
-    from diffusers import StableDiffusionXLPipeline
+    from diffusers import StableDiffusionKDiffusionPipeline
 
     # convert U-Net
     unet_sd = unet.state_dict()
@@ -558,7 +558,7 @@ def save_diffusers_checkpoint(
     remove_name_or_path(tokenizer2)
     remove_name_or_path(vae)
 
-    pipeline = StableDiffusionXLPipeline(
+    pipeline = StableDiffusionKDiffusionPipeline(
         unet=diffusers_unet,
         text_encoder=text_encoder1,
         text_encoder_2=text_encoder2,
@@ -567,6 +567,7 @@ def save_diffusers_checkpoint(
         tokenizer=tokenizer1,
         tokenizer_2=tokenizer2,
     )
+    pipeline.set_scheduler("sample_dpmpp_2m_sde")
     if save_dtype is not None:
         pipeline.to(None, save_dtype)
     pipeline.save_pretrained(output_dir, safe_serialization=use_safetensors)

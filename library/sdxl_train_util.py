@@ -75,19 +75,20 @@ def _load_target_model(
         ) = sdxl_model_util.load_models_from_sdxl_checkpoint(model_version, name_or_path, device, model_dtype)
     else:
         # Diffusers model is loaded to CPU
-        from diffusers import StableDiffusionXLPipeline
+        from diffusers import StableDiffusionKDiffusionPipeline
 
         variant = "fp16" if weight_dtype == torch.float16 else None
         print(f"load Diffusers pretrained models: {name_or_path}, variant={variant}")
         try:
             try:
-                pipe = StableDiffusionXLPipeline.from_pretrained(
+                pipe = StableDiffusionKDiffusionPipeline.from_pretrained(
                     name_or_path, torch_dtype=model_dtype, variant=variant, tokenizer=None
                 )
+                pipeline.set_scheduler("sample_dpmpp_2m_sde")
             except EnvironmentError as ex:
                 if variant is not None:
                     print("try to load fp32 model")
-                    pipe = StableDiffusionXLPipeline.from_pretrained(name_or_path, variant=None, tokenizer=None)
+                    pipe = StableDiffusionKDiffusionPipeline.from_pretrained(name_or_path, variant=None, tokenizer=None)
                 else:
                     raise ex
         except EnvironmentError as ex:

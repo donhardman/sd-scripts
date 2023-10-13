@@ -38,7 +38,7 @@ from transformers import CLIPTokenizer, CLIPTextModel, CLIPTextModelWithProjecti
 import transformers
 from diffusers.optimization import SchedulerType, TYPE_TO_SCHEDULER_FUNCTION
 from diffusers import (
-    StableDiffusionPipeline,
+    StableDiffusionKDiffusionPipeline,
     DDPMScheduler,
     EulerAncestralDiscreteScheduler,
     DPMSolverMultistepScheduler,
@@ -3813,7 +3813,7 @@ def _load_target_model(args: argparse.Namespace, weight_dtype, device="cpu", une
         # Diffusers model is loaded to CPU
         print(f"load Diffusers pretrained models: {name_or_path}")
         try:
-            pipe = StableDiffusionPipeline.from_pretrained(name_or_path, tokenizer=None, safety_checker=None)
+            pipe = StableDiffusionKDiffusionPipeline.from_pretrained(name_or_path, tokenizer=None, safety_checker=None)
         except EnvironmentError as ex:
             print(
                 f"model is not found as a file or in Hugging Face, perhaps file name is wrong? / 指定したモデル名のファイル、またはHugging Faceのモデルが見つかりません。ファイル名が誤っているかもしれません: {name_or_path}"
@@ -4453,7 +4453,6 @@ def sample_images_common(
         scheduler_cls = DPMSolverMultistepScheduler
         sched_init_args["algorithm_type"] = args.sample_sampler
         sched_init_args["use_karras_sigmas"] = True
-        sched_init_args["thresholding"] = True
     elif args.sample_sampler == "heun":
         scheduler_cls = HeunDiscreteScheduler
     elif args.sample_sampler == "dpm_2" or args.sample_sampler == "k_dpm_2":

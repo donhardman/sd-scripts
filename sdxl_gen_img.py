@@ -1422,7 +1422,6 @@ def main(args):
         scheduler_cls = DPMSolverMultistepScheduler
         sched_init_args["algorithm_type"] = args.sampler
         sched_init_args["use_karras_sigmas"] = True
-        sched_init_args["thresholding"] = True
         scheduler_module = diffusers.schedulers.scheduling_dpmsolver_multistep
         has_clip_sample = False
     elif args.sampler == "heun":
