@@ -84,7 +84,6 @@ def _load_target_model(
                 pipe = StableDiffusionKDiffusionPipeline.from_pretrained(
                     name_or_path, torch_dtype=model_dtype, variant=variant, tokenizer=None
                 )
-                pipeline.set_scheduler("sample_dpmpp_2m_sde")
             except EnvironmentError as ex:
                 if variant is not None:
                     print("try to load fp32 model")
@@ -97,6 +96,7 @@ def _load_target_model(
             )
             raise ex
 
+        pipe.set_scheduler("sample_dpmpp_2m_sde")
         text_encoder1 = pipe.text_encoder
         text_encoder2 = pipe.text_encoder_2
 

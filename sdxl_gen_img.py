@@ -1422,6 +1422,7 @@ def main(args):
         scheduler_cls = DPMSolverMultistepScheduler
         sched_init_args["algorithm_type"] = args.sampler
         sched_init_args["use_karras_sigmas"] = True
+        sched_init_args["prediction_type"] = 'v_prediction'
         scheduler_module = diffusers.schedulers.scheduling_dpmsolver_multistep
         has_clip_sample = False
     elif args.sampler == "heun":
@@ -1684,6 +1685,7 @@ def main(args):
         scheduler,
         args.clip_skip,
     )
+    pipe.set_scheduler("sample_dpmpp_2m_sde")
     pipe.set_control_nets(control_nets)
     print("pipeline is ready.")
 
