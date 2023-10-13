@@ -1446,46 +1446,46 @@ def main(args):
 
     # samplerの乱数をあらかじめ指定するための処理
 
-    # replace randn
-    class NoiseManager:
-        def __init__(self):
-            self.sampler_noises = None
-            self.sampler_noise_index = 0
+    # # replace randn
+    # class NoiseManager:
+    #     def __init__(self):
+    #         self.sampler_noises = None
+    #         self.sampler_noise_index = 0
 
-        def reset_sampler_noises(self, noises):
-            self.sampler_noise_index = 0
-            self.sampler_noises = noises
+    #     def reset_sampler_noises(self, noises):
+    #         self.sampler_noise_index = 0
+    #         self.sampler_noises = noises
 
-        def randn(self, shape, device=None, dtype=None, layout=None, generator=None):
-            # print("replacing", shape, len(self.sampler_noises), self.sampler_noise_index)
-            if self.sampler_noises is not None and self.sampler_noise_index < len(self.sampler_noises):
-                noise = self.sampler_noises[self.sampler_noise_index]
-                if shape != noise.shape:
-                    noise = None
-            else:
-                noise = None
+    #     def randn(self, shape, device=None, dtype=None, layout=None, generator=None):
+    #         # print("replacing", shape, len(self.sampler_noises), self.sampler_noise_index)
+    #         if self.sampler_noises is not None and self.sampler_noise_index < len(self.sampler_noises):
+    #             noise = self.sampler_noises[self.sampler_noise_index]
+    #             if shape != noise.shape:
+    #                 noise = None
+    #         else:
+    #             noise = None
 
-            if noise == None:
-                print(f"unexpected noise request: {self.sampler_noise_index}, {shape}")
-                noise = torch.randn(shape, dtype=dtype, device=device, generator=generator)
+    #         if noise == None:
+    #             print(f"unexpected noise request: {self.sampler_noise_index}, {shape}")
+    #             noise = torch.randn(shape, dtype=dtype, device=device, generator=generator)
 
-            self.sampler_noise_index += 1
-            return noise
+    #         self.sampler_noise_index += 1
+    #         return noise
 
-    class TorchRandReplacer:
-        def __init__(self, noise_manager):
-            self.noise_manager = noise_manager
+    # class TorchRandReplacer:
+    #     def __init__(self, noise_manager):
+    #         self.noise_manager = noise_manager
 
-        def __getattr__(self, item):
-            if item == "randn":
-                return self.noise_manager.randn
-            if hasattr(torch, item):
-                return getattr(torch, item)
-            raise AttributeError("'{}' object has no attribute '{}'".format(type(self).__name__, item))
+    #     def __getattr__(self, item):
+    #         if item == "randn":
+    #             return self.noise_manager.randn
+    #         if hasattr(torch, item):
+    #             return getattr(torch, item)
+    #         raise AttributeError("'{}' object has no attribute '{}'".format(type(self).__name__, item))
 
-    noise_manager = NoiseManager()
-    if scheduler_module is not None:
-        scheduler_module.torch = TorchRandReplacer(noise_manager)
+    # noise_manager = NoiseManager()
+    # if scheduler_module is not None:
+    #     scheduler_module.torch = TorchRandReplacer(noise_manager)
 
     scheduler = scheduler_cls(
         num_train_timesteps=SCHEDULER_TIMESTEPS,
@@ -2107,7 +2107,7 @@ def main(args):
                 if i2i_noises is not None:  # img2img noise
                     i2i_noises[i] = torch.randn(noise_shape, device=device, dtype=dtype)
 
-            noise_manager.reset_sampler_noises(noises)
+            # noise_manager.reset_sampler_noises(noises)
 
             # すべての画像が同じなら1枚だけpipeに渡すことでpipe側で処理を高速化する
             if init_images is not None and all_images_are_same:
