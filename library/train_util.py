@@ -4595,6 +4595,7 @@ def sample_images_common(
             sched_init_args["use_lu_lambdas"] = True
         if args.sample_sampler == 'k-sde-dpmsolver++' or args.sample_sampler == 'sde-dpmsolver++' or args.sample_sampler == 'lu-sde-dpmsolver++':
             sched_init_args["euler_at_final"] = True
+
         scheduler_module = diffusers.schedulers.scheduling_dpmsolver_multistep
     elif args.sample_sampler == "dpmsingle":
         scheduler_cls = DPMSolverSinglestepScheduler
