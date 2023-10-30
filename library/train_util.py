@@ -4590,6 +4590,7 @@ def sample_images_common(
         if args.sample_sampler == 'k-sde-dpmsolver++' or args.sample_sampler == 'k-dpmsolver++':
             sched_init_args["algorithm_type"] = args.sample_sampler[2:]
             sched_init_args["use_karras_sigmas"] = True
+
         if args.sample_sampler == 'lu-sde-dpmsolver++':
             sched_init_args["algorithm_type"] = args.sample_sampler[3:]
             sched_init_args["use_lu_lambdas"] = True
