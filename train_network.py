@@ -755,6 +755,7 @@ class NetworkTrainer:
 
         # training loop
         epoch_loss_map = {}
+        epoch_weight_map = {}
         for epoch in range(num_train_epochs):
             accelerator.print(f"\nepoch {epoch+1}/{num_train_epochs}")
             current_epoch.value = epoch + 1
@@ -949,7 +950,6 @@ class NetworkTrainer:
             # If we need to stop on reaching the weight to prevent overfitting
             if args.stop_on_weight_norm and weight_norm > args.stop_on_weight_norm:
                 break
-
             # end of epoch
 
         # metadata["ss_epoch"] = str(num_train_epochs)
