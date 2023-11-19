@@ -9,6 +9,7 @@ from tqdm import tqdm
 from transformers import CLIPTokenizer
 from library import model_util, sdxl_model_util, train_util, sdxl_original_unet
 from library.sdxl_lpw_stable_diffusion import SdxlStableDiffusionLongPromptWeightingPipeline
+from diffusers import StableDiffusionXLPipeline
 
 TOKENIZER1_PATH = "openai/clip-vit-large-patch14"
 TOKENIZER2_PATH = "laion/CLIP-ViT-bigG-14-laion2B-39B-b160k"
@@ -24,7 +25,6 @@ def load_target_model(args, accelerator, model_version: str, weight_dtype):
             print(f"loading model for process {accelerator.state.local_process_index}/{accelerator.state.num_processes}")
 
             (
-                load_stable_diffusion_format,
                 text_encoder1,
                 text_encoder2,
                 vae,
@@ -38,6 +38,7 @@ def load_target_model(args, accelerator, model_version: str, weight_dtype):
                 weight_dtype,
                 accelerator.device if args.lowram else "cpu",
                 model_dtype,
+                args.compile
             )
 
             # work on low-ram device
@@ -53,78 +54,65 @@ def load_target_model(args, accelerator, model_version: str, weight_dtype):
 
     text_encoder1, text_encoder2, unet = train_util.transform_models_if_DDP([text_encoder1, text_encoder2, unet])
 
-    return load_stable_diffusion_format, text_encoder1, text_encoder2, vae, unet, logit_scale, ckpt_info
+    return text_encoder1, text_encoder2, vae, unet, logit_scale, ckpt_info
 
 
 def _load_target_model(
-    name_or_path: str, vae_path: Optional[str], model_version: str, weight_dtype, device="cpu", model_dtype=None
+    name_or_path: str, vae_path: Optional[str], model_version: str, weight_dtype, device="cpu", model_dtype=None, compile_method=None
 ):
-    # model_dtype only work with full fp16/bf16
-    name_or_path = os.readlink(name_or_path) if os.path.islink(name_or_path) else name_or_path
-    load_stable_diffusion_format = os.path.isfile(name_or_path)  # determine SD or Diffusers
-
-    if load_stable_diffusion_format:
-        print(f"load StableDiffusion checkpoint: {name_or_path}")
-        (
-            text_encoder1,
-            text_encoder2,
-            vae,
-            unet,
-            logit_scale,
-            ckpt_info,
-        ) = sdxl_model_util.load_models_from_sdxl_checkpoint(model_version, name_or_path, device, model_dtype)
-    else:
-        # Diffusers model is loaded to CPU
-        from diffusers import StableDiffusionXLPipeline
-
-        variant = "fp16" if weight_dtype == torch.float16 else None
-        print(f"load Diffusers pretrained models: {name_or_path}, variant={variant}")
+    variant = "fp16" if weight_dtype == torch.float16 else None
+    print(f"load Diffusers pretrained models: {name_or_path}, variant={variant}")
+    try:
         try:
-            try:
-                pipe = StableDiffusionXLPipeline.from_pretrained(
-                    name_or_path, torch_dtype=model_dtype, variant=variant, tokenizer=None
-                )
-            except EnvironmentError as ex:
-                if variant is not None:
-                    print("try to load fp32 model")
-                    pipe = StableDiffusionXLPipeline.from_pretrained(name_or_path, variant=None, tokenizer=None)
-                else:
-                    raise ex
-        except EnvironmentError as ex:
-            print(
-                f"model is not found as a file or in Hugging Face, perhaps file name is wrong? / 指定したモデル名のファイル、またはHugging Faceのモデルが見つかりません。ファイル名が誤っているかもしれません: {name_or_path}"
+            pipe = StableDiffusionXLPipeline.from_single_file(
+                name_or_path, dtype=model_dtype, variant=variant, tokenizer=None
             )
-            raise ex
+        except EnvironmentError as ex:
+            if variant is not None:
+                print("try to load fp32 model")
+                pipe = StableDiffusionXLPipeline.from_pretrained(name_or_path, variant=None, tokenizer=None)
+            else:
+                raise ex
+    except EnvironmentError as ex:
+        print(
+            f"model is not found as a file or in Hugging Face, perhaps file name is wrong? / 指定したモデル名のファイル、またはHugging Faceのモデルが見つかりません。ファイル名が誤っているかもしれません: {name_or_path}"
+        )
+        raise ex
 
-        text_encoder1 = pipe.text_encoder
-        text_encoder2 = pipe.text_encoder_2
+    if compile_method:
+        print(f"Enable compile with method: {compile_method}")
+        from .compile import compile
+        pipe = compile(pipe, compile_method)
 
-        # convert to fp32 for cache text_encoders outputs
-        if text_encoder1.dtype != torch.float32:
-            text_encoder1 = text_encoder1.to(dtype=torch.float32)
-        if text_encoder2.dtype != torch.float32:
-            text_encoder2 = text_encoder2.to(dtype=torch.float32)
+    text_encoder1 = pipe.text_encoder
+    text_encoder2 = pipe.text_encoder_2
 
-        vae = pipe.vae
-        unet = pipe.unet
-        del pipe
+    # convert to fp32 for cache text_encoders outputs
+    if text_encoder1.dtype != torch.float32:
+        text_encoder1 = text_encoder1.to(dtype=torch.float32)
+    if text_encoder2.dtype != torch.float32:
+        text_encoder2 = text_encoder2.to(dtype=torch.float32)
 
-        # Diffusers U-Net to original U-Net
-        state_dict = sdxl_model_util.convert_diffusers_unet_state_dict_to_sdxl(unet.state_dict())
-        with init_empty_weights():
-            unet = sdxl_original_unet.SdxlUNet2DConditionModel()  # overwrite unet
-        sdxl_model_util._load_state_dict_on_device(unet, state_dict, device=device, dtype=model_dtype)
-        print("U-Net converted to original U-Net")
+    vae = pipe.vae
+    unet = pipe.unet
+    del pipe
 
-        logit_scale = None
-        ckpt_info = None
+    # Diffusers U-Net to original U-Net
+    state_dict = sdxl_model_util.convert_diffusers_unet_state_dict_to_sdxl(unet.state_dict())
+    with init_empty_weights():
+        unet = sdxl_original_unet.SdxlUNet2DConditionModel()  # overwrite unet
+    sdxl_model_util._load_state_dict_on_device(unet, state_dict, device=device, dtype=model_dtype)
+    print("U-Net converted to original U-Net")
+
+    logit_scale = None
+    ckpt_info = None
 
     # VAEを読み込む
     if vae_path is not None:
         vae = model_util.load_vae(vae_path, weight_dtype)
         print("additional VAE loaded")
 
-    return load_stable_diffusion_format, text_encoder1, text_encoder2, vae, unet, logit_scale, ckpt_info
+    return text_encoder1, text_encoder2, vae, unet, logit_scale, ckpt_info
 
 
 def load_tokenizers(args: argparse.Namespace):

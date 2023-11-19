@@ -17,7 +17,6 @@ import re
 import diffusers
 import numpy as np
 import torch
-from .compile import compile
 
 try:
     import intel_extension_for_pytorch as ipex
@@ -1535,12 +1534,10 @@ def main(args):
         print("set vae_dtype to float32")
         vae_dtype = torch.float32
     vae.to(vae_dtype).to(device)
-    vae = compile(vae)
 
     text_encoder1.to(dtype).to(device)
     text_encoder2.to(dtype).to(device)
     unet.to(dtype).to(device)
-    unet = compile(unet)
 
     # networkを組み込む
     if args.network_module:

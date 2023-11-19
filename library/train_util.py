@@ -2825,6 +2825,12 @@ def add_training_arguments(parser: argparse.ArgumentParser, support_dreambooth: 
         help="use sdpa for CrossAttention (requires PyTorch 2.0) / CrossAttentionにsdpaを使う（PyTorch 2.0が必要）",
     )
     parser.add_argument(
+        "--compile",
+        default=None,
+        choices=[None, "stable-fast", "torch"],
+        help="Compile pipeline before use with given method"
+    )
+    parser.add_argument(
         "--vae", type=str, default=None, help="path to checkpoint of vae to replace / VAEを入れ替える場合、VAEのcheckpointファイルまたはディレクトリ"
     )
 

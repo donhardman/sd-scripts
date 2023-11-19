@@ -144,7 +144,6 @@ def train(args):
 
     # モデルを読み込む
     (
-        load_stable_diffusion_format,
         text_encoder1,
         text_encoder2,
         vae,
