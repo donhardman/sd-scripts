@@ -8,7 +8,6 @@ from multiprocessing import Value
 from typing import List
 import toml
 
-from .compile import compile
 from tqdm import tqdm
 import torch
 
@@ -200,7 +199,6 @@ def train(args):
 
     # モデルを読み込む
     (
-        load_stable_diffusion_format,
         text_encoder1,
         text_encoder2,
         vae,
@@ -211,20 +209,12 @@ def train(args):
     # logit_scale = logit_scale.to(accelerator.device, dtype=weight_dtype)
 
     # verify load/save model formats
-    if load_stable_diffusion_format:
-        src_stable_diffusion_ckpt = args.pretrained_model_name_or_path
-        src_diffusers_model_path = None
-    else:
-        src_stable_diffusion_ckpt = None
-        src_diffusers_model_path = args.pretrained_model_name_or_path
+    src_stable_diffusion_ckpt = None
+    src_diffusers_model_path = args.pretrained_model_name_or_path
 
-    if args.save_model_as is None:
-        save_stable_diffusion_format = load_stable_diffusion_format
-        use_safetensors = args.use_safetensors
-    else:
-        save_stable_diffusion_format = args.save_model_as.lower() == "ckpt" or args.save_model_as.lower() == "safetensors"
-        use_safetensors = args.use_safetensors or ("safetensors" in args.save_model_as.lower())
-        # assert save_stable_diffusion_format, "save_model_as must be ckpt or safetensors / save_model_asはckptかsafetensorsである必要があります"
+    save_stable_diffusion_format = args.save_model_as.lower() == "ckpt" or args.save_model_as.lower() == "safetensors"
+    use_safetensors = args.use_safetensors or ("safetensors" in args.save_model_as.lower())
+    # assert save_stable_diffusion_format, "save_model_as must be ckpt or safetensors / save_model_asはckptかsafetensorsである必要があります"
 
     # Diffusers版のxformers使用フラグを設定する関数
     def set_diffusers_xformers_flag(model, valid):
@@ -317,12 +307,10 @@ def train(args):
         vae.requires_grad_(False)
         vae.eval()
         vae.to(accelerator.device, dtype=vae_dtype)
-        vae = compile(vae)
 
     unet.requires_grad_(train_unet)
     if not train_unet:
         unet.to(accelerator.device, dtype=weight_dtype)  # because of unet is not prepared
-        unet = compile(unet)
 
     training_models = []
     params_to_optimize = []
