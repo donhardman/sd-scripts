@@ -31,7 +31,6 @@ from torch import nn
 from torch.nn import functional as F
 from einops import rearrange
 
-
 IN_CHANNELS: int = 4
 OUT_CHANNELS: int = 4
 ADM_IN_CHANNELS: int = 2816
@@ -1097,9 +1096,7 @@ if __name__ == "__main__":
     import time
 
     print("create unet")
-    unet = SdxlUNet2DConditionModel()
-
-    unet.to("cuda")
+    unet = SdxlUNet2DConditionModel().to("cuda")
     unet.set_use_memory_efficient_attention(True, False)
     unet.set_gradient_checkpointing(True)
     unet.train()
