@@ -9,7 +9,6 @@ from tqdm import tqdm
 from transformers import CLIPTokenizer
 from library import model_util, sdxl_model_util, train_util, sdxl_original_unet
 from library.sdxl_lpw_stable_diffusion import SdxlStableDiffusionLongPromptWeightingPipeline
-from .compile import compile
 
 TOKENIZER1_PATH = "openai/clip-vit-large-patch14"
 TOKENIZER2_PATH = "laion/CLIP-ViT-bigG-14-laion2B-39B-b160k"
@@ -85,7 +84,6 @@ def _load_target_model(
                 pipe = StableDiffusionXLPipeline.from_pretrained(
                     name_or_path, torch_dtype=model_dtype, variant=variant, tokenizer=None
                 )
-                pipe = compile(pipe)
             except EnvironmentError as ex:
                 if variant is not None:
                     print("try to load fp32 model")
