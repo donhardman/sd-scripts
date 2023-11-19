@@ -1,3 +1,4 @@
+import torch
 # from sfast.compilers.stable_diffusion_pipeline_compiler import (compile as sf_compile,
 #                                                                CompilationConfig)
 def compile(model):

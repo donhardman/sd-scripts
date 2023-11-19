@@ -8,6 +8,7 @@ from multiprocessing import Value
 from typing import List
 import toml
 
+from .compile import compile
 from tqdm import tqdm
 import torch
 
@@ -316,10 +317,12 @@ def train(args):
         vae.requires_grad_(False)
         vae.eval()
         vae.to(accelerator.device, dtype=vae_dtype)
+        vae = compile(vae)
 
     unet.requires_grad_(train_unet)
     if not train_unet:
         unet.to(accelerator.device, dtype=weight_dtype)  # because of unet is not prepared
+        unet = compile(unet)
 
     training_models = []
     params_to_optimize = []
