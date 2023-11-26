@@ -460,6 +460,21 @@ class NetworkTrainer:
         accelerator.print(f"  gradient accumulation steps / 勾配を合計するステップ数 = {args.gradient_accumulation_steps}")
         accelerator.print(f"  total optimization steps / 学習ステップ数: {args.max_train_steps}")
 
+        if args.masked_loss:
+            masked = 0
+            for b in train_dataloader:
+               if torch.count_nonzero(b['masks']) != torch.numel(b['masks']):
+                   masked += 1
+
+            # val_masked = 0
+            # for b in val_dataloader:
+            #    if torch.count_nonzero(b['masks']) != torch.numel(b['masks']):
+            #        val_masked += 1
+
+            accelerator.print("  using masked loss")
+            accelerator.print(f"  masked: {masked}/{len(train_dataloader)}")
+            # accelerator.print(f"  validation masked: {val_masked}/{len(val_dataloader)}")
+
         # TODO refactor metadata creation and move to util
         metadata = {
             "ss_session_id": session_id,  # random integer indicating which group of epochs the model came from
