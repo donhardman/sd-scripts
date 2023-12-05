@@ -1541,7 +1541,9 @@ def main(args):
     vae.to(vae_dtype).to(device)
     vae.eval()
     vae = compile(vae)
-
+    text_encoder1.to(dtype).to(device)
+    text_encoder2.to(dtype).to(device)
+    unet.to(dtype).to(device)
     text_encoder1.eval()
     text_encoder2.eval()
     unet.eval()
