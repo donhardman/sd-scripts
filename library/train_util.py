@@ -2886,8 +2886,8 @@ def add_training_arguments(parser: argparse.ArgumentParser, support_dreambooth: 
     )
     parser.add_argument(
         "--compile",
-        default=None,
-        choices=[None, "stable-fast", "torch"],
+        default=False,
+        action="store_true",
         help="Compile pipeline before use with given method"
     )
     parser.add_argument(

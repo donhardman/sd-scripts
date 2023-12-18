@@ -5538,8 +5538,8 @@ def setup_parser() -> argparse.ArgumentParser:
     parser.add_argument("--sdpa", action="store_true", help="use sdpa in PyTorch 2 / sdpa")
     parser.add_argument(
         "--compile",
-        default=None,
-        choices=[None, "stable-fast", "torch"],
+        default=False,
+        action="store_true",
         help="Compile pipeline before use with given method"
     )
     parser.add_argument(
