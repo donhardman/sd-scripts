@@ -7,7 +7,6 @@ from safetensors.torch import load_file
 from library.original_unet import UNet2DConditionModel, SampleOutput
 
 import library.model_util as model_util
-from .compile import compile
 
 class ControlNetInfo(NamedTuple):
 	unet: Any
@@ -99,8 +98,6 @@ def load_control_net(v2, unet, model):
 
 	ctrl_unet.to(unet.device, dtype=unet.dtype)
 	ctrl_net.to(unet.device, dtype=unet.dtype)
-	ctrl_unet = compile(ctrl_unet)
-	ctrl_net = compile(ctrl_net)
 	return ctrl_unet, ctrl_net
 
 

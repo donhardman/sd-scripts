@@ -17,7 +17,6 @@ import re
 import diffusers
 import numpy as np
 import torch
-from .compile import compile
 
 try:
     import intel_extension_for_pytorch as ipex
@@ -1540,14 +1539,12 @@ def main(args):
         vae_dtype = torch.float32
     vae.to(vae_dtype).to(device)
     vae.eval()
-    vae = compile(vae)
     text_encoder1.to(dtype).to(device)
     text_encoder2.to(dtype).to(device)
     unet.to(dtype).to(device)
     text_encoder1.eval()
     text_encoder2.eval()
     unet.eval()
-    unet = compile(unet)
 
     # networkを組み込む
     if args.network_module:
@@ -4219,7 +4216,7 @@ def main(args):
             args.ckpt = files[0]
 
     (text_encoder1, text_encoder2, vae, unet, _, _) = sdxl_train_util._load_target_model(
-        args.ckpt, args.vae, sdxl_model_util.MODEL_VERSION_SDXL_BASE_V1_0, dtype, compile_method=args.compile
+        args.ckpt, args.vae, sdxl_model_util.MODEL_VERSION_SDXL_BASE_V1_0, dtype
     )
     unet: InferSdxlUNet2DConditionModel = InferSdxlUNet2DConditionModel(unet)
 
@@ -4386,12 +4383,10 @@ def main(args):
         vae_dtype = torch.float32
     vae.to(vae_dtype).to(device)
     vae.eval()
-    vae = compile(vae)
 
     text_encoder1.eval()
     text_encoder2.eval()
     unet.eval()
-    unet = compile(unet)
 
     # networkを組み込む
     if args.network_module:
@@ -5536,12 +5531,6 @@ def setup_parser() -> argparse.ArgumentParser:
     parser.add_argument("--bf16", action="store_true", help="use bfloat16 / bfloat16を指定し省メモリ化する")
     parser.add_argument("--xformers", action="store_true", help="use xformers / xformersを使用し高速化する")
     parser.add_argument("--sdpa", action="store_true", help="use sdpa in PyTorch 2 / sdpa")
-    parser.add_argument(
-        "--compile",
-        default=False,
-        action="store_true",
-        help="Compile pipeline before use with given method"
-    )
     parser.add_argument(
         "--diffusers_xformers",
         action="store_true",
