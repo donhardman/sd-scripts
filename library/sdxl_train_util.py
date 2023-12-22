@@ -25,7 +25,7 @@ def load_target_model(args, accelerator, model_version: str, weight_dtype):
             print(f"loading model for process {accelerator.state.local_process_index}/{accelerator.state.num_processes}")
 
             (
-                _,
+                load_stable_diffusion_format,
                 text_encoder1,
                 text_encoder2,
                 vae,
@@ -38,7 +38,7 @@ def load_target_model(args, accelerator, model_version: str, weight_dtype):
                 model_version,
                 weight_dtype,
                 accelerator.device if args.lowram else "cpu",
-                model_dtype
+                model_dtype,
             )
 
             # work on low-ram device
@@ -52,9 +52,7 @@ def load_target_model(args, accelerator, model_version: str, weight_dtype):
             torch.cuda.empty_cache()
         accelerator.wait_for_everyone()
 
-    text_encoder1, text_encoder2, unet = train_util.transform_models_if_DDP([text_encoder1, text_encoder2, unet])
-
-    return text_encoder1, text_encoder2, vae, unet, logit_scale, ckpt_info
+    return load_stable_diffusion_format, text_encoder1, text_encoder2, vae, unet, logit_scale, ckpt_info
 
 def _load_target_model(
     name_or_path: str, vae_path: Optional[str], model_version: str, weight_dtype, device="cpu", model_dtype=None

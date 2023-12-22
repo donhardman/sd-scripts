@@ -13,7 +13,6 @@ except Exception:
 from library import sdxl_model_util, sdxl_train_util, train_util
 import train_network
 
-torch.backends.cuda.matmul.allow_tf32 = True
 class SdxlNetworkTrainer(train_network.NetworkTrainer):
     def __init__(self):
         super().__init__()
@@ -37,6 +36,7 @@ class SdxlNetworkTrainer(train_network.NetworkTrainer):
 
     def load_target_model(self, args, weight_dtype, accelerator):
         (
+            load_stable_diffusion_format,
             text_encoder1,
             text_encoder2,
             vae,
@@ -45,6 +45,7 @@ class SdxlNetworkTrainer(train_network.NetworkTrainer):
             ckpt_info,
         ) = sdxl_train_util.load_target_model(args, accelerator, sdxl_model_util.MODEL_VERSION_SDXL_BASE_V1_0, weight_dtype)
 
+        self.load_stable_diffusion_format = load_stable_diffusion_format
         self.logit_scale = logit_scale
         self.ckpt_info = ckpt_info
 
