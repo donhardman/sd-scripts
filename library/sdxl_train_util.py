@@ -56,8 +56,6 @@ def load_target_model(args, accelerator, model_version: str, weight_dtype):
 
     return text_encoder1, text_encoder2, vae, unet, logit_scale, ckpt_info
 
-
-
 def _load_target_model(
     name_or_path: str, vae_path: Optional[str], model_version: str, weight_dtype, device="cpu", model_dtype=None
 ):
