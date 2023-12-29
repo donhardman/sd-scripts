@@ -333,7 +333,7 @@ def train(args):
     global_step = 0
 
     noise_scheduler = DDPMScheduler(
-        beta_start=0.00085, beta_end=0.012, beta_schedule="scaled_linear", num_train_timesteps=1000, clip_sample=False
+        prediction_type="epsilon", variance_type="learned", beta_start=0.0001, beta_end=0.024, beta_schedule="squaredcos_cap_v2", num_train_timesteps=1000, clip_sample=True, rescale_betas_zero_snr=args.zero_terminal_snr
     )
     prepare_scheduler_for_custom_training(noise_scheduler, accelerator.device)
     if args.zero_terminal_snr:
