@@ -2322,7 +2322,7 @@ def main(args):
         **sched_init_args,
     )
 
-    # clip_sample=Trueにする
+    # clip_sample=Falseにする
     if hasattr(scheduler.config, "clip_sample") and scheduler.config.clip_sample is False:
         print("set clip_sample to True")
         scheduler.config.clip_sample = True
@@ -5810,7 +5810,7 @@ def main(args):
         **sched_init_args,
     )
 
-    # clip_sample=Trueにする
+    # clip_sample=Falseにする
     if hasattr(scheduler.config, "clip_sample") and scheduler.config.clip_sample is False:
         print("set clip_sample to True")
         scheduler.config.clip_sample = True
@@ -9300,7 +9300,7 @@ def main(args):
         **sched_init_args,
     )
 
-    # clip_sample=Trueにする
+    # clip_sample=Falseにする
     if hasattr(scheduler.config, "clip_sample") and scheduler.config.clip_sample is False:
         print("set clip_sample to True")
         scheduler.config.clip_sample = True
