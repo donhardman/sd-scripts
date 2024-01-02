@@ -307,7 +307,6 @@ def train(args):
         for m in training_models:
             m.train()
 
-        args.ip_noise_gamma = args.ip_noise_gamma * args.ip_noise_factor
         for step, batch in enumerate(train_dataloader):
             current_step.value = global_step
             with accelerator.accumulate(training_models[0]):  # 複数モデルに対応していない模様だがとりあえずこうしておく
@@ -451,7 +450,7 @@ def train(args):
                     accelerator.unwrap_model(unet),
                     vae,
                 )
-
+        args.ip_noise_gamma = args.ip_noise_gamma * args.ip_noise_factor
         train_util.sample_images(accelerator, args, epoch + 1, global_step, accelerator.device, vae, tokenizer, text_encoder, unet)
 
     is_main_process = accelerator.is_main_process

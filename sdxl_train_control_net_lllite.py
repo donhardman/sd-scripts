@@ -379,7 +379,6 @@ def train(args):
     for epoch in range(num_train_epochs):
         accelerator.print(f"\nepoch {epoch+1}/{num_train_epochs}")
         current_epoch.value = epoch + 1
-        args.ip_noise_gamma = args.ip_noise_gamma * args.ip_noise_factor
         for step, batch in enumerate(train_dataloader):
             current_step.value = global_step
             with accelerator.accumulate(unet):
@@ -509,7 +508,7 @@ def train(args):
 
             if global_step >= args.max_train_steps:
                 break
-
+        args.ip_noise_gamma = args.ip_noise_gamma * args.ip_noise_factor
         if args.logging_dir is not None:
             logs = {"loss/epoch": loss_recorder.moving_average}
             accelerator.log(logs, step=epoch + 1)

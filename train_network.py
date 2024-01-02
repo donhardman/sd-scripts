@@ -742,7 +742,6 @@ class NetworkTrainer:
             metadata["ss_epoch"] = str(epoch + 1)
 
             accelerator.unwrap_model(network).on_epoch_start(text_encoder, unet)
-            args.ip_noise_gamma = args.ip_noise_gamma * args.ip_noise_factor
             for step, batch in enumerate(train_dataloader):
                 current_step.value = global_step
                 with accelerator.accumulate(network):
@@ -873,7 +872,7 @@ class NetworkTrainer:
 
                 if global_step >= args.max_train_steps:
                     break
-
+            args.ip_noise_gamma = args.ip_noise_gamma * args.ip_noise_factor
             if args.logging_dir is not None:
                 logs = {"loss/epoch": loss_recorder.moving_average}
                 accelerator.log(logs, step=epoch + 1)

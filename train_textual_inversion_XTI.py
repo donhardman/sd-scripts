@@ -423,7 +423,6 @@ def train(args):
         text_encoder.train()
 
         loss_total = 0
-        args.ip_noise_gamma = args.ip_noise_gamma * args.ip_noise_factor
         for step, batch in enumerate(train_dataloader):
             current_step.value = global_step
             with accelerator.accumulate(text_encoder):
@@ -545,7 +544,7 @@ def train(args):
 
             if global_step >= args.max_train_steps:
                 break
-
+        args.ip_noise_gamma = args.ip_noise_gamma * args.ip_noise_factor
         if args.logging_dir is not None:
             logs = {"loss/epoch": loss_total / len(train_dataloader)}
             accelerator.log(logs, step=epoch + 1)
