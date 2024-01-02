@@ -780,6 +780,7 @@ class NetworkTrainer:
 
                     # Sample noise, sample a random timestep for each image, and add noise to the latents,
                     # with noise offset and/or multires noise if specified
+                    args.ip_noise_gamma = args.ip_noise_gamma * args.ip_noise_factor
                     noise, noisy_latents, timesteps = train_util.get_noise_noisy_latents_and_timesteps(
                         args, noise_scheduler, latents
                     )

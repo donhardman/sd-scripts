@@ -3017,6 +3017,12 @@ def add_training_arguments(parser: argparse.ArgumentParser, support_dreambooth: 
         help="enable input perturbation noise. used for regularization. recommended value: around 0.1 (from arxiv.org/abs/2301.11706) "
         + "/  input perturbation noiseを有効にする。正則化に使用される。推奨値: 0.1程度 (arxiv.org/abs/2301.11706 より)",
     )
+    parser.add_argument(
+        "--ip_noise_factor",
+        type=float,
+        default=1,
+        help="enable input perturbation noise decreasing factor",
+    )
     # parser.add_argument(
     #     "--perlin_noise",
     #     type=int,
