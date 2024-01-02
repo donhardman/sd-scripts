@@ -451,6 +451,7 @@ def train(args):
                     vae,
                 )
         args.ip_noise_gamma = args.ip_noise_gamma * args.ip_noise_factor
+        args.v_pred_like_loss = args.v_pred_like_loss * args.v_pred_like_loss_factor
         train_util.sample_images(accelerator, args, epoch + 1, global_step, accelerator.device, vae, tokenizer, text_encoder, unet)
 
     is_main_process = accelerator.is_main_process

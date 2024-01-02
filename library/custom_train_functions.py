@@ -118,6 +118,12 @@ def add_custom_train_arguments(parser: argparse.ArgumentParser, support_weighted
         help="add v-prediction like loss multiplied by this value / v-prediction lossをこの値をかけたものをlossに加算する",
     )
     parser.add_argument(
+        "--v_pred_like_loss_factor",
+        type=float,
+        default=1,
+        help="add v-prediction like loss decreasing factor",
+    )
+    parser.add_argument(
         "--debiased_estimation_loss",
         action="store_true",
         help="debiased estimation loss / debiased estimation loss",

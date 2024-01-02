@@ -873,6 +873,7 @@ class NetworkTrainer:
                 if global_step >= args.max_train_steps:
                     break
             args.ip_noise_gamma = args.ip_noise_gamma * args.ip_noise_factor
+            args.v_pred_like_loss = args.v_pred_like_loss * args.v_pred_like_loss_factor
             if args.logging_dir is not None:
                 logs = {"loss/epoch": loss_recorder.moving_average}
                 accelerator.log(logs, step=epoch + 1)
