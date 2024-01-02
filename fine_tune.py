@@ -307,6 +307,7 @@ def train(args):
         for m in training_models:
             m.train()
 
+        args.ip_noise_gamma = args.ip_noise_gamma * args.ip_noise_factor
         for step, batch in enumerate(train_dataloader):
             current_step.value = global_step
             with accelerator.accumulate(training_models[0]):  # 複数モデルに対応していない模様だがとりあえずこうしておく
@@ -338,7 +339,6 @@ def train(args):
 
                 # Sample noise, sample a random timestep for each image, and add noise to the latents,
                 # with noise offset and/or multires noise if specified
-                args.ip_noise_gamma = args.ip_noise_gamma * args.ip_noise_factor ** epoch
                 noise, noisy_latents, timesteps = train_util.get_noise_noisy_latents_and_timesteps(args, noise_scheduler, latents)
 
                 # Predict the noise residual
