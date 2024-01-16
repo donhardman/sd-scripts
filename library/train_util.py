@@ -3005,12 +3005,6 @@ def add_training_arguments(parser: argparse.ArgumentParser, support_dreambooth: 
         help="enable noise offset with this value (if enabled, around 0.1 is recommended) / Noise offsetを有効にしてこの値を設定する（有効にする場合は0.1程度を推奨）",
     )
     parser.add_argument(
-        "--multires_noise_iterations",
-        type=int,
-        default=None,
-        help="enable multires noise with this number of iterations (if enabled, around 6-10 is recommended) / Multires noiseを有効にしてこのイテレーション数を設定する（有効にする場合は6-10程度を推奨）",
-    )
-    parser.add_argument(
         "--ip_noise_gamma",
         type=float,
         default=None,
@@ -3023,6 +3017,18 @@ def add_training_arguments(parser: argparse.ArgumentParser, support_dreambooth: 
         default=1,
         help="enable input perturbation noise decreasing factor",
     )
+    parser.add_argument(
+        "--ip_noise_noise_start",
+        type=int,
+        default=0,
+        help="Epoch which we start to aply the noise",
+    )
+    parser.add_argument(
+        "--ip_noise_noise_end",
+        type=int,
+        default=-1,
+        help="How many epochs the noise is applied",
+    )
     # parser.add_argument(
     #     "--perlin_noise",
     #     type=int,
@@ -3030,10 +3036,34 @@ def add_training_arguments(parser: argparse.ArgumentParser, support_dreambooth: 
     #     help="enable perlin noise and set the octaves / perlin noiseを有効にしてoctavesをこの値に設定する",
     # )
     parser.add_argument(
+        "--multires_noise_iterations",
+        type=int,
+        default=None,
+        help="enable multires noise with this number of iterations (if enabled, around 6-10 is recommended) / Multires noiseを有効にしてこのイテレーション数を設定する（有効にする場合は6-10程度を推奨）",
+    )
+    parser.add_argument(
         "--multires_noise_discount",
         type=float,
         default=0.3,
         help="set discount value for multires noise (has no effect without --multires_noise_iterations) / Multires noiseのdiscount値を設定する（--multires_noise_iterations指定時のみ有効）",
+    )
+    parser.add_argument(
+        "--multires_noise_factor",
+        type=float,
+        default=1,
+        help="enable multires noise increasing or decreasing factor",
+    )
+    parser.add_argument(
+        "--multires_noise_start",
+        type=int,
+        default=0,
+        help="Epoch which we start to aply the noise",
+    )
+    parser.add_argument(
+        "--multires_noise_end",
+        type=int,
+        default=-1,
+        help="How many epochs the noise is applied",
     )
     parser.add_argument(
         "--adaptive_noise_scale",
