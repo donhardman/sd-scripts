@@ -734,9 +734,43 @@ class NetworkTrainer:
         # For --sample_at_first
         self.sample_images(accelerator, args, 0, global_step, accelerator.device, vae, tokenizer, text_encoder, unet)
 
+        ip_noise_gamma = args.ip_noise_gamma
+        v_pred_like_loss = args.v_pred_like_loss
+        multires_noise_iterations = args.multires_noise_iterations
+        multires_noise_discount = args.multires_noise_discount
+        args.ip_noise_gamma = 0
+        args.v_pred_like_loss = 0
+        args.multires_noise_discount = 0
+        args.multires_noise_iterations = 0
+        if args.ip_noise_end == -1:
+            args.ip_noise_end = num_train_epochs
+        if args.v_pred_like_loss_end == -1:
+            args.v_pred_like_loss_end = num_train_epochs
+        if args.multires_noise_end == -1:
+            args.multires_noise_end = num_train_epochs
+
         # training loop
         for epoch in range(num_train_epochs):
             accelerator.print(f"\nepoch {epoch+1}/{num_train_epochs}")
+            if epoch >= args.ip_noise_start and epoch <= args.ip_noise_end:
+                if ip_noise_gamma != args.ip_noise_gamma:
+                    accelerator.print("\nenabling IP noise ")
+                ip_noise_gamma = ip_noise_gamma * args.ip_noise_factor
+                args.ip_noise_gamma = ip_noise_gamma
+            if epoch >= args.v_pred_like_loss_start and epoch <= args.v_pred_like_loss_end:
+                if v_pred_like_loss != args.v_pred_like_loss:
+                    accelerator.print("\nenabling v pred like loss")
+                v_pred_like_loss = v_pred_like_loss * args.v_pred_like_loss_factor
+                args.v_pred_like_loss = v_pred_like_loss
+            if epoch >= args.multires_noise_start and epoch <= args.multires_noise_end:
+                if multires_noise_discount != args.multires_noise_discount:
+                    accelerator.print("\nenabling multires noise")
+                multires_noise_discount = multires_noise_discount * args.multires_noise_factor
+                args.multires_noise_discount = multires_noise_discount
+                multires_noise_iterations = int(multires_noise_iterations * args.multires_noise_factor)
+                args.multires_noise_iterations = multires_noise_iterations
+
+
             current_epoch.value = epoch + 1
 
             metadata["ss_epoch"] = str(epoch + 1)
@@ -872,8 +906,7 @@ class NetworkTrainer:
 
                 if global_step >= args.max_train_steps:
                     break
-            args.ip_noise_gamma = args.ip_noise_gamma * args.ip_noise_factor
-            args.v_pred_like_loss = args.v_pred_like_loss * args.v_pred_like_loss_factor
+
             if args.logging_dir is not None:
                 logs = {"loss/epoch": loss_recorder.moving_average}
                 accelerator.log(logs, step=epoch + 1)
