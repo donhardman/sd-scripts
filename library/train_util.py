@@ -3018,13 +3018,13 @@ def add_training_arguments(parser: argparse.ArgumentParser, support_dreambooth: 
         help="enable input perturbation noise decreasing factor",
     )
     parser.add_argument(
-        "--ip_noise_noise_start",
+        "--ip_noise_start",
         type=int,
         default=0,
         help="Epoch which we start to aply the noise",
     )
     parser.add_argument(
-        "--ip_noise_noise_end",
+        "--ip_noise_end",
         type=int,
         default=-1,
         help="How many epochs the noise is applied",
