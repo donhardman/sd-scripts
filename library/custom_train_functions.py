@@ -125,15 +125,15 @@ def add_custom_train_arguments(parser: argparse.ArgumentParser, support_weighted
     )
     parser.add_argument(
         "--v_pred_like_loss_start",
-        type=int,
+        type=float,
         default=0,
-        help="Epoch which we start to aply the noise",
+        help="The percentage of the training we start to aply the noise",
     )
     parser.add_argument(
         "--v_pred_like_loss_end",
-        type=int,
-        default=-1,
-        help="How many epochs the noise is applied",
+        type=float,
+        default=1,
+        help="The percentage of the training the noise is applied",
     )
     parser.add_argument(
         "--debiased_estimation_loss",

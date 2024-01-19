@@ -309,27 +309,28 @@ def train(args):
     args.v_pred_like_loss = 0
     args.multires_noise_discount = 0
     args.multires_noise_iterations = 0
-    if args.ip_noise_end == -1:
-        args.ip_noise_end = num_train_epochs
-    if args.v_pred_like_loss_end == -1:
-        args.v_pred_like_loss_end = num_train_epochs
-    if args.multires_noise_end == -1:
-        args.multires_noise_end = num_train_epochs
+
+    ip_noise_start = int(args.ip_noise_start * num_train_epochs)
+    ip_noise_end = int(args.ip_noise_end * num_train_epochs)
+    v_pred_like_loss_start = int(args.v_pred_like_loss_start * num_train_epochs)
+    v_pred_like_loss_end = int(args.v_pred_like_loss_end * num_train_epochs)
+    multires_noise_start = int(args.multires_noise_start * num_train_epochs)
+    multires_noise_end = int(args.multires_noise_end * num_train_epochs)
 
     loss_recorder = train_util.LossRecorder()
     for epoch in range(num_train_epochs):
         accelerator.print(f"\nepoch {epoch+1}/{num_train_epochs}")
-        if epoch >= args.ip_noise_start and epoch <= args.ip_noise_end:
+        if epoch >= ip_noise_start and epoch <= ip_noise_end:
             if ip_noise_gamma != args.ip_noise_gamma:
                 accelerator.print("\nenabling IP noise ")
             ip_noise_gamma = ip_noise_gamma * args.ip_noise_factor
             args.ip_noise_gamma = ip_noise_gamma
-        if epoch >= args.v_pred_like_loss_start and epoch <= args.v_pred_like_loss_end:
+        if epoch >= v_pred_like_loss_start and epoch <= v_pred_like_loss_end:
             if v_pred_like_loss != args.v_pred_like_loss:
                 accelerator.print("\nenabling v pred like loss")
             v_pred_like_loss = v_pred_like_loss * args.v_pred_like_loss_factor
             args.v_pred_like_loss = v_pred_like_loss
-        if epoch >= args.multires_noise_start and epoch <= args.multires_noise_end:
+        if epoch >= multires_noise_start and epoch <= multires_noise_end:
             if multires_noise_discount != args.multires_noise_discount:
                 accelerator.print("\nenabling multires noise")
             multires_noise_discount = multires_noise_discount * args.multires_noise_factor
