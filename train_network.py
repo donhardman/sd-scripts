@@ -463,9 +463,11 @@ class NetworkTrainer:
 
         if args.masked_loss:
             masked = 0
+            threshold = 0.9  # This threshold should be set according to your mask preprocessing
             for b in train_dataloader:
-               if torch.count_nonzero(b['masks']) != torch.numel(b['masks']):
-                   masked += 1
+                # Check if any pixel value in the mask is below the threshold, which we consider as masked
+                if (b['masks'] <= threshold).any():
+                    masked += 1
 
             # val_masked = 0
             # for b in val_dataloader:
