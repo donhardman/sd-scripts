@@ -786,7 +786,7 @@ class NetworkTrainer:
                 current_step.value = global_step
                 with accelerator.accumulate(network):
                     if train_text_encoder and global_step == args.stop_text_encoder_training:
-                        print(f"stop text encoder training at step {global_step}")
+                        accelerator.print(f"stop text encoder training at step {global_step}")
                         for t_enc in text_encoders:
                             if not args.gradient_checkpointing:
                                 t_enc.train(False)
