@@ -744,10 +744,7 @@ class NetworkTrainer:
         v_pred_like_loss = args.v_pred_like_loss
         multires_noise_iterations = args.multires_noise_iterations
         multires_noise_discount = args.multires_noise_discount
-        args.ip_noise_gamma = 0
-        args.v_pred_like_loss = 0
-        args.multires_noise_discount = 0
-        args.multires_noise_iterations = 0
+
         ip_noise_start = int(args.ip_noise_start * num_train_epochs)
         ip_noise_end = int(args.ip_noise_end * num_train_epochs)
         v_pred_like_loss_start = int(args.v_pred_like_loss_start * num_train_epochs)
@@ -757,18 +754,24 @@ class NetworkTrainer:
 
         # training loop
         for epoch in range(num_train_epochs):
+            # Reset it all
+            args.ip_noise_gamma = 0
+            args.v_pred_like_loss = 0
+            args.multires_noise_discount = 0
+            args.multires_noise_iterations = 0
+
             accelerator.print(f"\nepoch {epoch+1}/{num_train_epochs}")
-            if epoch >= ip_noise_start and epoch <= ip_noise_end:
+            if ip_noise_gamma > 0 and epoch >= ip_noise_start and epoch <= ip_noise_end:
                 if ip_noise_gamma != args.ip_noise_gamma:
                     accelerator.print("\nenabling IP noise ")
                 ip_noise_gamma = ip_noise_gamma * args.ip_noise_factor
                 args.ip_noise_gamma = ip_noise_gamma
-            if epoch >= v_pred_like_loss_start and epoch <= v_pred_like_loss_end:
+            if v_pred_like_loss > 0 and epoch >= v_pred_like_loss_start and epoch <= v_pred_like_loss_end:
                 if v_pred_like_loss != args.v_pred_like_loss:
                     accelerator.print("\nenabling v pred like loss")
                 v_pred_like_loss = v_pred_like_loss * args.v_pred_like_loss_factor
                 args.v_pred_like_loss = v_pred_like_loss
-            if epoch >= multires_noise_start and epoch <= multires_noise_end:
+            if multires_noise_discount > 0 and epoch >= multires_noise_start and epoch <= multires_noise_end:
                 if multires_noise_discount != args.multires_noise_discount:
                     accelerator.print("\nenabling multires noise")
                 multires_noise_discount = multires_noise_discount * args.multires_noise_factor
@@ -786,7 +789,7 @@ class NetworkTrainer:
                 current_step.value = global_step
                 with accelerator.accumulate(network):
                     if train_text_encoder and global_step == args.stop_text_encoder_training:
-                        accelerator.print(f"stop text encoder training at step {global_step}")
+                        accelerator.print(f"\nstop text encoder training at step {global_step}")
                         for t_enc in text_encoders:
                             if not args.gradient_checkpointing:
                                 t_enc.train(False)
