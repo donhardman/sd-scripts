@@ -336,7 +336,7 @@ def train(args):
             if multires_noise_discount != args.multires_noise_discount:
                 accelerator.print("\nenabling multires noise")
             args.multires_noise_discount = multires_noise_discount * pow(args.multires_noise_factor, epoch - 1)
-            args.multires_noise_iterations = multires_noise_iterations * pow(args.multires_noise_factor, epoch - 1)
+            args.multires_noise_iterations = int(multires_noise_iterations * pow(args.multires_noise_factor, epoch - 1))
 
         current_epoch.value = epoch + 1
 
