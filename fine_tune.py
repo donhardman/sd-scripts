@@ -325,20 +325,18 @@ def train(args):
         if ip_noise_gamma > 0 and epoch >= ip_noise_start and epoch <= ip_noise_end:
             if ip_noise_gamma != args.ip_noise_gamma:
                 accelerator.print("\nenabling IP noise ")
-            ip_noise_gamma = ip_noise_gamma * args.ip_noise_factor
-            args.ip_noise_gamma = ip_noise_gamma
+            args.ip_noise_gamma = ip_noise_gamma * pow(args.ip_noise_factor, epoch - 1)
+
         if v_pred_like_loss > 0 and epoch >= v_pred_like_loss_start and epoch <= v_pred_like_loss_end:
             if v_pred_like_loss != args.v_pred_like_loss:
                 accelerator.print("\nenabling v pred like loss")
-            v_pred_like_loss = v_pred_like_loss * args.v_pred_like_loss_factor
-            args.v_pred_like_loss = v_pred_like_loss
+            args.v_pred_like_loss = v_pred_like_loss * pow(args.v_pred_like_loss_factor, epoch - 1)
+
         if multires_noise_discount > 0 and epoch >= multires_noise_start and epoch <= multires_noise_end:
             if multires_noise_discount != args.multires_noise_discount:
                 accelerator.print("\nenabling multires noise")
-            multires_noise_discount = multires_noise_discount * args.multires_noise_factor
-            args.multires_noise_discount = multires_noise_discount
-            multires_noise_iterations = int(multires_noise_iterations * args.multires_noise_factor)
-            args.multires_noise_iterations = multires_noise_iterations
+            args.multires_noise_discount = multires_noise_discount * pow(args.multires_noise_factor, epoch - 1)
+            args.multires_noise_iterations = multires_noise_iterations * pow(args.multires_noise_factor, epoch - 1)
 
         current_epoch.value = epoch + 1
 
