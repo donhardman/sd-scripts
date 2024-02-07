@@ -307,11 +307,11 @@ def train(args):
     multires_noise_discount = args.multires_noise_discount
 
     ip_noise_start = int(args.ip_noise_start * num_train_epochs)
-    ip_noise_end = int(args.ip_noise_end * num_train_epochs) + 1
+    ip_noise_end = int(args.ip_noise_end * num_train_epochs)
     v_pred_like_loss_start = int(args.v_pred_like_loss_start * num_train_epochs)
-    v_pred_like_loss_end = int(args.v_pred_like_loss_end * num_train_epochs) + 1
+    v_pred_like_loss_end = int(args.v_pred_like_loss_end * num_train_epochs)
     multires_noise_start = int(args.multires_noise_start * num_train_epochs)
-    multires_noise_end = int(args.multires_noise_end * num_train_epochs) + 1
+    multires_noise_end = int(args.multires_noise_end * num_train_epochs)
 
     loss_recorder = train_util.LossRecorder()
     for epoch in range(num_train_epochs):
