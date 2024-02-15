@@ -3736,7 +3736,11 @@ def get_optimizer(args, trainable_params):
             print(f"use Prodigy optimizer | {optimizer_kwargs}")
             optimizer_class = prodigyopt.Prodigy
             optimizer = optimizer_class(trainable_params, lr=lr, **optimizer_kwargs)
-
+    elif optimizer_type == "AdaCoor".lower():
+        from library.adacoor import AdaCoor
+        print(f"use AdaCoor optimizer | {optimizer_kwargs}")
+        optimizer_class = AdaCoor
+        optimizer = optimizer_class(trainable_params, eps=optimizer_kwargs["epsilon"], **optimizer_kwargs)
     elif optimizer_type == "Adafactor".lower():
         # 引数を確認して適宜補正する
         if "relative_step" not in optimizer_kwargs:
