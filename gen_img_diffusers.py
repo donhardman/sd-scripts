@@ -2647,7 +2647,7 @@ def main(args):
     def resize_images(imgs, size):
         resized = []
         for img in imgs:
-            r_img = img.resize(size, Image.Resampling.LANCZOS)
+            r_img = img.resize(size, Image.LANCZOS)
             if hasattr(img, "filename"):  # filename属性がない場合があるらしい
                 r_img.filename = img.filename
             resized.append(r_img)
@@ -6135,7 +6135,7 @@ def main(args):
     def resize_images(imgs, size):
         resized = []
         for img in imgs:
-            r_img = img.resize(size, Image.Resampling.LANCZOS)
+            r_img = img.resize(size, Image.LANCZOS)
             if hasattr(img, "filename"):  # filename属性がない場合があるらしい
                 r_img.filename = img.filename
             resized.append(r_img)
@@ -9645,7 +9645,7 @@ def main(args):
     def resize_images(imgs, size):
         resized = []
         for img in imgs:
-            r_img = img.resize(size, Image.Resampling.LANCZOS)
+            r_img = img.resize(size, Image.LANCZOS)
             if hasattr(img, "filename"):  # filename属性がない場合があるらしい
                 r_img.filename = img.filename
             resized.append(r_img)
