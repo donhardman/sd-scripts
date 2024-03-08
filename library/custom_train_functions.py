@@ -3,7 +3,10 @@ import argparse
 import random
 import re
 from typing import List, Optional, Union
-
+from .utils import setup_logging
+setup_logging()
+import logging
+logger = logging.getLogger(__name__)
 
 def prepare_scheduler_for_custom_training(noise_scheduler, device):
     if hasattr(noise_scheduler, "all_snr"):
@@ -21,7 +24,7 @@ def prepare_scheduler_for_custom_training(noise_scheduler, device):
 
 def fix_noise_scheduler_betas_for_zero_terminal_snr(noise_scheduler):
     # fix beta: zero terminal SNR
-    print(f"fix noise scheduler betas: https://arxiv.org/abs/2305.08891")
+    logger.info(f"fix noise scheduler betas: https://arxiv.org/abs/2305.08891")
 
     def enforce_zero_terminal_snr(betas):
         # Convert betas to alphas_bar_sqrt
@@ -49,8 +52,8 @@ def fix_noise_scheduler_betas_for_zero_terminal_snr(noise_scheduler):
     alphas = 1.0 - betas
     alphas_cumprod = torch.cumprod(alphas, dim=0)
 
-    # print("original:", noise_scheduler.betas)
-    # print("fixed:", betas)
+    # logger.info(f"original: {noise_scheduler.betas}")
+    # logger.info(f"fixed: {betas}")
 
     noise_scheduler.betas = betas
     noise_scheduler.alphas = alphas
@@ -79,13 +82,13 @@ def get_snr_scale(timesteps, noise_scheduler):
     snr_t = torch.minimum(snr_t, torch.ones_like(snr_t) * 1000)  # if timestep is 0, snr_t is inf, so limit it to 1000
     scale = snr_t / (snr_t + 1)
     # # show debug info
-    # print(f"timesteps: {timesteps}, snr_t: {snr_t}, scale: {scale}")
+    # logger.info(f"timesteps: {timesteps}, snr_t: {snr_t}, scale: {scale}")
     return scale
 
 
 def add_v_prediction_like_loss(loss, timesteps, noise_scheduler, v_pred_like_loss):
     scale = get_snr_scale(timesteps, noise_scheduler)
-    # print(f"add v-prediction like loss: {v_pred_like_loss}, scale: {scale}, loss: {loss}, time: {timesteps}")
+    # logger.info(f"add v-prediction like loss: {v_pred_like_loss}, scale: {scale}, loss: {loss}, time: {timesteps}")
     loss = loss + loss / scale * v_pred_like_loss
     return loss
 
@@ -116,24 +119,6 @@ def add_custom_train_arguments(parser: argparse.ArgumentParser, support_weighted
         type=float,
         default=None,
         help="add v-prediction like loss multiplied by this value / v-prediction lossをこの値をかけたものをlossに加算する",
-    )
-    parser.add_argument(
-        "--v_pred_like_loss_factor",
-        type=float,
-        default=1,
-        help="add v-prediction like loss decreasing factor",
-    )
-    parser.add_argument(
-        "--v_pred_like_loss_start",
-        type=float,
-        default=0,
-        help="The percentage of the training we start to aply the noise",
-    )
-    parser.add_argument(
-        "--v_pred_like_loss_end",
-        type=float,
-        default=1,
-        help="The percentage of the training the noise is applied",
     )
     parser.add_argument(
         "--debiased_estimation_loss",
@@ -286,7 +271,7 @@ def get_prompts_with_weights(tokenizer, prompt: List[str], max_length: int):
         tokens.append(text_token)
         weights.append(text_weight)
     if truncated:
-        print("Prompt was truncated. Try to shorten the prompt or increase max_embeddings_multiples")
+        logger.warning("Prompt was truncated. Try to shorten the prompt or increase max_embeddings_multiples")
     return tokens, weights
 
 
@@ -487,27 +472,6 @@ def apply_noise_offset(latents, noise, noise_offset, adaptive_noise_scale):
 
     noise = noise + noise_offset * torch.randn((latents.shape[0], latents.shape[1], 1, 1), device=latents.device)
     return noise
-
-
-def get_latent_masks(image_masks, latent_shape, device):
-    # given that masks lower the average loss this will counteract the effect
-    factor = torch.sqrt(image_masks.mean([1, 2]))
-    factor = torch.where(factor != 0.0, factor, 1.0)
-    factor = factor.reshape(factor.shape + (1,) * 2)
-    image_masks = image_masks / factor
-
-    masks = (
-        image_masks
-        .to(device)
-        .reshape(latent_shape[0], 1, latent_shape[2] * 8, latent_shape[3] * 8)
-    )
-    # resize to match latent
-    masks = torch.nn.functional.interpolate(
-        masks.float(),
-        size=latent_shape[-2:],
-        mode="nearest"
-    )
-    return masks
 
 
 """
